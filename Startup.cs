@@ -1,5 +1,6 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.IO;
 using System.Linq;
 using System.Reflection;
 using System.Threading.Tasks;
@@ -14,6 +15,7 @@ using Microsoft.AspNetCore.Builder;
 using Microsoft.AspNetCore.Hosting;
 using Microsoft.AspNetCore.HttpsPolicy;
 using Microsoft.AspNetCore.Mvc;
+using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Logging;
@@ -34,14 +36,15 @@ namespace SkoleTrackerApi
         // This method gets called by the runtime. Use this method to add services to the container.
         public void ConfigureServices(IServiceCollection services)
         {
+            services.AddDbContext<SkoleTrackerContext>();
+        
             using (var s = new SkoleTrackerContext())
             {
                 s.Database.EnsureCreated();
 
             }           
-            services.AddTransient<INotificationService>((x) =>new NotificationService());
+            services.AddTransient<INotificationService>(x =>new NotificationService());
 
-            services.AddDbContext<SkoleTrackerContext>();
             services.AddTransient(typeof(IPipelineBehavior<,>), typeof(RequestPreProcessorBehavior<,>));
            
             services.AddMediatR(typeof(GetUserQuery).GetTypeInfo().Assembly);  
@@ -49,7 +52,10 @@ namespace SkoleTrackerApi
             
             services.AddSwaggerGen(c =>
             {
-                c.SwaggerDoc("v1", new Info { Title = "My API", Version = "v1" });
+                c.SwaggerDoc("v1", new Info { Title = "Skole Tracker API",  Version = "v1" });
+//                var xmlFile = $"{Assembly.GetExecutingAssembly().GetName().Name}.xml";
+//                var xmlPath = Path.Combine(AppContext.BaseDirectory, xmlFile);
+//                c.IncludeXmlComments(xmlPath);
             });
             services.AddMvc().SetCompatibilityVersion(CompatibilityVersion.Version_2_2);
         }
@@ -69,7 +75,7 @@ namespace SkoleTrackerApi
             app.UseSwagger();
             app.UseSwaggerUI(c =>
             {
-                c.SwaggerEndpoint("/swagger/v1/swagger.json", "My API V1");
+                c.SwaggerEndpoint("/swagger/v1/swagger.json", "Skole Tracker API V1");
                 c.RoutePrefix = string.Empty;
             });
 
