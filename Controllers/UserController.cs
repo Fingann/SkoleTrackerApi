@@ -6,6 +6,7 @@ using Application.Users.Commands.CreateUser;
 using Application.Users.Commands.UpdateUser;
 using Application.Users.Querys.GetUser;
 using Application.Users.Querys.ViewModels;
+using Application.Users.ViewModels;
 using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
 
@@ -20,7 +21,7 @@ namespace SkoleTrackerApi.Controllers
         /// <summary>
         /// Retrive a list of users
         /// </summary>
-        /// <returns></returns>
+        /// <returns>A list of users</returns>
         [HttpGet]
         public async Task<ActionResult<IEnumerable<UserViewModel>>> GetUsers()
         {
@@ -28,13 +29,14 @@ namespace SkoleTrackerApi.Controllers
             return Ok(s);
         }
         
+        
         /// <summary>
         /// Retrive a user
         /// </summary>
         /// <param name="id"></param>
-        /// <returns></returns>
+        /// <returns>A user object</returns>
         [HttpGet("{id}")]
-        public async Task<ActionResult<IEnumerable<UserViewModel>>> GetUser(int id)
+        public async Task<ActionResult<UserViewModel>> GetUser(int id)
         {
             var s = await Mediator.Send(new GetUserQuery(id));
             return Ok(s);
@@ -43,7 +45,7 @@ namespace SkoleTrackerApi.Controllers
         /// <summary>
         /// Create a new user
         /// </summary>
-        /// <param name="command"></param>
+        /// <param name="command">User object</param>
         /// <returns></returns>
         [HttpPost]
         [ProducesResponseType(StatusCodes.Status200OK)]

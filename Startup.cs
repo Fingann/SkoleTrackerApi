@@ -7,6 +7,7 @@ using System.Threading.Tasks;
 using Application.Database;
 using Application.Notifications;
 using Application.Users.Querys.GetUser;
+using AutoMapper;
 //using Application.Users.Querys.GetUser;
 using MediatR;
 using MediatR.Pipeline;
@@ -43,6 +44,8 @@ namespace SkoleTrackerApi
                 s.Database.EnsureCreated();
 
             }           
+            services.AddAutoMapper();
+
             services.AddTransient<INotificationService>(x =>new NotificationService());
 
             services.AddTransient(typeof(IPipelineBehavior<,>), typeof(RequestPreProcessorBehavior<,>));
@@ -53,9 +56,9 @@ namespace SkoleTrackerApi
             services.AddSwaggerGen(c =>
             {
                 c.SwaggerDoc("v1", new Info { Title = "Skole Tracker API",  Version = "v1" });
-//                var xmlFile = $"{Assembly.GetExecutingAssembly().GetName().Name}.xml";
-//                var xmlPath = Path.Combine(AppContext.BaseDirectory, xmlFile);
-//                c.IncludeXmlComments(xmlPath);
+                var xmlFile = $"{Assembly.GetExecutingAssembly().GetName().Name}.xml";
+                var xmlPath = Path.Combine(AppContext.BaseDirectory, xmlFile);
+                c.IncludeXmlComments(xmlPath);
             });
             services.AddMvc().SetCompatibilityVersion(CompatibilityVersion.Version_2_2);
         }
