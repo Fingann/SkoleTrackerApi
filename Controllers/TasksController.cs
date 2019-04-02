@@ -11,8 +11,7 @@ using Microsoft.AspNetCore.Mvc;
 
 namespace SkoleTrackerApi.Controllers
 {
-    [Route("api/[controller]")]
-    [ApiController]
+    
     public class TasksController : BaseController
     {
 

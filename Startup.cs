@@ -5,6 +5,7 @@ using System.Linq;
 using System.Reflection;
 using System.Threading.Tasks;
 using Application.Database;
+using Application.Infrastructure;
 using Application.Notifications;
 using Application.Users.Querys.GetUser;
 using AutoMapper;
@@ -38,20 +39,23 @@ namespace SkoleTrackerApi
         public void ConfigureServices(IServiceCollection services)
         {
             services.AddDbContext<SkoleTrackerContext>();
-        
             using (var s = new SkoleTrackerContext())
             {
                 s.Database.EnsureCreated();
 
             }           
             services.AddAutoMapper();
+            services.AddTransient(typeof(IPipelineBehavior<,>), typeof(RequestPreProcessorBehavior<,>));
+            services.AddTransient(typeof(IRequestPreProcessor<>), typeof(RequestLogger<>));
 
             services.AddTransient<INotificationService>(x =>new NotificationService());
 
-            services.AddTransient(typeof(IPipelineBehavior<,>), typeof(RequestPreProcessorBehavior<,>));
            
             services.AddMediatR(typeof(GetUserQuery).GetTypeInfo().Assembly);  
             services.AddMediatR(typeof(GetUserQueryHandler).GetTypeInfo().Assembly);  
+            
+            
+            services.AddMvc().SetCompatibilityVersion(CompatibilityVersion.Version_2_2);
             
             services.AddSwaggerGen(c =>
             {
@@ -60,7 +64,6 @@ namespace SkoleTrackerApi
                 var xmlPath = Path.Combine(AppContext.BaseDirectory, xmlFile);
                 c.IncludeXmlComments(xmlPath);
             });
-            services.AddMvc().SetCompatibilityVersion(CompatibilityVersion.Version_2_2);
         }
 
         // This method gets called by the runtime. Use this method to configure the HTTP request pipeline.
@@ -79,6 +82,7 @@ namespace SkoleTrackerApi
             app.UseSwaggerUI(c =>
             {
                 c.SwaggerEndpoint("/swagger/v1/swagger.json", "Skole Tracker API V1");
+                
                 c.RoutePrefix = string.Empty;
             });
 

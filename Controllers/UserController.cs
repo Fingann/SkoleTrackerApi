@@ -13,13 +13,12 @@ using Microsoft.AspNetCore.Mvc;
 namespace SkoleTrackerApi.Controllers
 {
     
-    [Route("api/[controller]")]
-    [ApiController]
+    
     public class UsersController : BaseController
     {
         
         /// <summary>
-        /// Retrive a list of users
+        /// Retrieve a list of users
         /// </summary>
         /// <returns>A list of users</returns>
         [HttpGet]
@@ -31,12 +30,12 @@ namespace SkoleTrackerApi.Controllers
         
         
         /// <summary>
-        /// Retrive a user
+        /// Retrieve a user
         /// </summary>
         /// <param name="id"></param>
         /// <returns>A user object</returns>
         [HttpGet("{id}")]
-        public async Task<ActionResult<UserViewModel>> GetUser(int id)
+        public async Task<ActionResult<UserViewModel>> GetUser([FromQuery]int id)
         {
             var s = await Mediator.Send(new GetUserQuery(id));
             return Ok(s);
@@ -50,7 +49,7 @@ namespace SkoleTrackerApi.Controllers
         [HttpPost]
         [ProducesResponseType(StatusCodes.Status200OK)]
         [ProducesDefaultResponseType]
-        public async Task<IActionResult> CreateUser( [FromBody]CreateUserCommand command)
+        public async Task<IActionResult> Create( [FromBody]CreateUserCommand command)
         {
             if (await Mediator.Send(command))
             {
@@ -69,7 +68,7 @@ namespace SkoleTrackerApi.Controllers
         [HttpPut]
         [ProducesResponseType(StatusCodes.Status200OK)]
         [ProducesDefaultResponseType]
-        public async Task<IActionResult> UpdateUser( [FromBody]UpdateUserCommand command)
+        public async Task<IActionResult> Update( [FromBody]UpdateUserCommand command)
         {
             if (await Mediator.Send(command))
             {
