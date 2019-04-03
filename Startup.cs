@@ -7,7 +7,7 @@ using System.Threading.Tasks;
 using Application.Database;
 using Application.Infrastructure;
 using Application.Notifications;
-using Application.Users.Querys.GetUser;
+using Application.Project.Querys.GetProject;
 using AutoMapper;
 //using Application.Users.Querys.GetUser;
 using MediatR;
@@ -17,11 +17,13 @@ using Microsoft.AspNetCore.Builder;
 using Microsoft.AspNetCore.Hosting;
 using Microsoft.AspNetCore.HttpsPolicy;
 using Microsoft.AspNetCore.Mvc;
+using Microsoft.AspNetCore.Rewrite.Internal.IISUrlRewrite;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Logging;
 using Microsoft.Extensions.Options;
+using Persistence.Database;
 using Swashbuckle.AspNetCore.Swagger;
 
 namespace SkoleTrackerApi
@@ -38,11 +40,19 @@ namespace SkoleTrackerApi
         // This method gets called by the runtime. Use this method to add services to the container.
         public void ConfigureServices(IServiceCollection services)
         {
-            services.AddDbContext<SkoleTrackerContext>();
-            using (var s = new SkoleTrackerContext())
+            services.AddDbContext<ProjectTrackerContext>();
+            using (var s = new ProjectTrackerContext())
             {
                 s.Database.EnsureCreated();
 
+                var projects = s.Projects.ToList();
+                var sessions = s.Sessions.ToList();
+                var tasks = s.Tasks.ToList();
+                var simplesession = s.SimpleTaskSessions.ToList();
+                var session1 = s.Sessions
+                        .Where(p => p.Id == -1)
+                        .SelectMany(p => p.WorkedOnTasks)
+                    .Select(pc => pc.SimpleTask).ToList();
             }           
             services.AddAutoMapper();
             services.AddTransient(typeof(IPipelineBehavior<,>), typeof(RequestPreProcessorBehavior<,>));
@@ -51,8 +61,8 @@ namespace SkoleTrackerApi
             services.AddTransient<INotificationService>(x =>new NotificationService());
 
            
-            services.AddMediatR(typeof(GetUserQuery).GetTypeInfo().Assembly);  
-            services.AddMediatR(typeof(GetUserQueryHandler).GetTypeInfo().Assembly);  
+            services.AddMediatR(typeof(GetProjectQuery).GetTypeInfo().Assembly);  
+            services.AddMediatR(typeof(GetProjectQueryHandler).GetTypeInfo().Assembly);  
             
             
             services.AddMvc().SetCompatibilityVersion(CompatibilityVersion.Version_2_2);
@@ -82,10 +92,8 @@ namespace SkoleTrackerApi
             app.UseSwaggerUI(c =>
             {
                 c.SwaggerEndpoint("/swagger/v1/swagger.json", "Skole Tracker API V1");
-                
                 c.RoutePrefix = string.Empty;
             });
-
             app.UseHttpsRedirection();
             app.UseMvc();
         }

@@ -1,11 +1,10 @@
 using System.Collections.Generic;
 using System.Threading.Tasks;
+using Application.Tasks.Commands.CreateTask;
+using Application.Tasks.Commands.UpdateTask;
+using Application.Tasks.Querys.GetTask;
+using Application.Tasks.Querys.GetTasks;
 using Application.Tasks.ViewModels;
-using Application.Users.Commands.CreateUser;
-using Application.Users.Commands.UpdateUser;
-using Application.Users.Querys.GetUser;
-using Application.Users.Querys.ViewModels;
-using Application.Users.ViewModels;
 using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
 
@@ -18,9 +17,9 @@ namespace SkoleTrackerApi.Controllers
         /// <summary>
         /// Retrive a list of Tasks
         /// </summary>
-        /// <returns>A list of users</returns>
+        /// <returns>A list of Tasks</returns>
         [HttpGet]
-        [ProducesDefaultResponseType]
+        [ProducesResponseType(StatusCodes.Status200OK)]
         public async Task<ActionResult<IEnumerable<TaskViewModel>>> GetTasks()
         {
             var s = await Mediator.Send(new GetTasksQuery());
@@ -32,7 +31,7 @@ namespace SkoleTrackerApi.Controllers
         /// Retrive a Task
         /// </summary>
         /// <param name="id"></param>
-        /// <returns>A user object</returns>
+        /// <returns>A Task object</returns>
         [HttpGet("{id}")]
         [ProducesDefaultResponseType]
         public async Task<ActionResult<TaskViewModel>> GetTask(int id)
@@ -44,19 +43,14 @@ namespace SkoleTrackerApi.Controllers
         /// <summary>
         /// Create a new Task
         /// </summary>
-        /// <param name="command">User object</param>
+        /// <param name="command">Task object</param>
         /// <returns></returns>
         [HttpPost]
-        [ProducesResponseType(StatusCodes.Status200OK)]
-        public async Task<IActionResult> CreateTask([FromBody] CreateTaskCommand command)
+        [ProducesResponseType(StatusCodes.Status201Created)]
+        public async Task<IActionResult> Create([FromBody] CreateTaskCommand command)
         {
-            if (await Mediator.Send(command))
-            {
-                return Ok();
-            }
-
-            return NotFound();
-
+            var s = await Mediator.Send(command);
+            return CreatedAtAction(nameof(Create), new { id = s.Id }, s);
         }
 
         /// <summary>
@@ -66,11 +60,12 @@ namespace SkoleTrackerApi.Controllers
         /// <returns></returns>
         [HttpPut]
         [ProducesResponseType(StatusCodes.Status200OK)]
-        public async Task<IActionResult> UpdateTask([FromBody] UpdateTaskCommand command)
+        [ProducesResponseType(StatusCodes.Status404NotFound)]  
+        public async Task<IActionResult> Update([FromBody] UpdateTaskCommand command)
         {
             if (await Mediator.Send(command))
             {
-                return Ok();
+                return NoContent();
             }
             return NotFound();
         }
